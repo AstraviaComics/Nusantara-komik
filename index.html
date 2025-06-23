@@ -3,58 +3,11 @@
 
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <link rel="stylesheet" href="css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.3.2/css/flag-icons.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <link rel="stylesheet" href="style.css">
-    <script>
-  const viewStack = [];
-
-  function navigateTo(viewId) {
-    const current = document.querySelector('.content-view.active, .sub-view.active');
-    if (current) {
-      current.classList.remove('active');
-      viewStack.push(current.id);
-    }
-
-    const target = document.getElementById(viewId);
-    if (target) {
-      target.classList.add('active');
-      // Tambah ke browser history agar tombol back Android bisa terpicu
-      history.pushState({ viewId }, '', '');
-    }
-  }
-
-  function goBack() {
-    const current = document.querySelector('.content-view.active, .sub-view.active');
-    if (current) current.classList.remove('active');
-
-    const prevId = viewStack.pop();
-    if (prevId) {
-      const previous = document.getElementById(prevId);
-      if (previous) previous.classList.add('active');
-    } else {
-      // Jika tidak ada history, kembalikan ke home
-      document.getElementById('home-view').classList.add('active');
-    }
-  }
-
-  // Tangkap tombol kembali dari Android (via history back)
-  window.addEventListener('popstate', (event) => {
-    // Gunakan stack internal kita
-    goBack();
-  });
-
-  // Untuk tombol panah back di UI
-  document.querySelectorAll('.sub-view-back').forEach(button => {
-    button.addEventListener('click', () => {
-      // Simulasikan tombol Android back juga
-      history.back();
-    });
-  });
-    </script>
-    <link rel="manifest" href="manifest.json" />
     <title>Nusantara-Komik</title>
     <style>
       :root {
@@ -874,10 +827,7 @@
         transition: all 0.2s ease;
       }
       
-      .chapter-item:hover {
-        background-color: var(--hover-dark);
-        transform: translateX(3px);
-      }
+      
       
       .chapter-info {
         flex: 1;
@@ -918,21 +868,38 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0,0,0,0.8);
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center; /* Tengah vertikal */
+  justify-content: center; /* Tengah horizontal */
   z-index: 1000;
-  display: none;
-  justify-content: center;
-  align-items: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.donation-modal.active {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .donation-content {
   background: var(--card);
   padding: 25px;
-  border-radius: 3px;
+  border-radius: 2px;
   text-align: center;
   max-width: 300px;
-  width: 90%;
+  width: 80%;
   border: 1px solid var(--border-dark);
+  transform: translateY(700px);
+  opacity: 0;
+  transition: all 0.5s cubic-bezier(0.25, 0.1, 0.25, 1);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.donation-modal.active .donation-content {
+  transform: translateY(0); /* Posisi tepat di tengah */
+  opacity: 1;
 }
 
 .donation-barcode {
@@ -1375,9 +1342,7 @@
         transition: all 0.2s ease;
       }
       
-      .chapter-item:hover {
-        background: var(--hover-dark);
-      }
+      
       
       .chapter-item.current {
         background: var(--primary);
@@ -1564,7 +1529,7 @@
         margin-bottom: 15px;
         color: var(--text-semi-dark);
         padding-bottom: 5px;
-        border-bottom: 1px solid var(--border-dark);
+        border-bottom: 2px solid var(--border-dark);
       }
       
       .settings-item {
@@ -1572,7 +1537,7 @@
         justify-content: space-between;
         align-items: center;
         padding: 12px 0;
-        border-bottom: 1px solid var(--border-dark);
+        
         cursor: pointer;
         transition: background-color 0.2s ease;
       }
@@ -1978,12 +1943,6 @@
         cursor: pointer;
         height: 0;
         width: 0;
-      }
-      
-      .language-flag {
-        font-size: 1.8rem;
-        margin-right: 16px;
-        min-width: 32px;
       }
       
       .language-info {
@@ -2564,7 +2523,11 @@
 
             <label class="language-item active">
               <input type="radio" name="language" value="id" checked>
-              <span class="fi fi-id fis language-flag"></span>
+              <svg xmlns="http://www.w3.org/2000/svg" id="flag-icons-id" viewBox="0 0 640 480" style="width: 32px; height: 24px; margin-right: 8px;">
+			  <path fill="#e70011" d="M0 0h640v240H0Z"/>
+			  <path fill="#fff" d="M0 240h640v240H0Z"/>
+			</svg>
+
               <div class="language-info">
                 <h3>Bahasa Indonesia</h3>
                 <p>Default</p>
@@ -2577,7 +2540,14 @@
 
             <label class="language-item">
               <input type="radio" name="language" value="en">
-              <span class="fi fi-gb fis language-flag"></span>
+              <svg xmlns="http://www.w3.org/2000/svg" id="flag-icons-gb" viewBox="0 0 640 480" style="width: 32px; height: 24px; margin-right: 8px;">
+  <path fill="#012169" d="M0 0h640v480H0z"/>
+  <path fill="#FFF" d="m75 0 244 181L562 0h78v62L400 241l240 178v61h-80L320 301 81 480H0v-60l239-178L0 64V0z"/>
+  <path fill="#C8102E" d="m424 281 216 159v40L369 281zm-184 20 6 35L54 480H0zM640 0v3L391 191l2-44L590 0zM0 0l239 176h-60L0 42z"/>
+  <path fill="#FFF" d="M241 0v480h160V0zM0 160v160h640V160z"/>
+  <path fill="#C8102E" d="M0 193v96h640v-96zM273 0v480h96V0z"/>
+</svg>
+
               <div class="language-info">
                 <h3>English</h3>
                 <p>English (US)</p>
@@ -2743,6 +2713,56 @@
 
 
     <script defer>
+    	
+    /****** START OF BACK BUTTON HANDLING SYSTEM ******/
+let viewHistory = ['home-view']; // Initialize with home view
+
+function handleBackButton() {
+  if (viewHistory.length > 1) {
+    viewHistory.pop();
+    const previousView = viewHistory[viewHistory.length - 1];
+    showView(previousView);
+  } else {
+    if (confirm('Keluar dari aplikasi?')) {
+      navigator.app && navigator.app.exitApp ? navigator.app.exitApp() : window.close();
+    }
+  }
+}
+
+function showView(viewId) {
+  // Hide all views
+  document.querySelectorAll('.content-view, .sub-view').forEach(view => {
+    view.classList.remove('active');
+  });
+  
+  // Show requested view
+  const view = document.getElementById(viewId);
+  if (view) {
+    view.classList.add('active');
+    
+    // Update header visibility
+    const header = document.querySelector('header');
+    const body = document.body;
+    if (viewId === 'settings-view') {
+      header.classList.add('hidden');
+      body.classList.add('header-hidden');
+    } else {
+      header.classList.remove('hidden');
+      body.classList.remove('header-hidden');
+    }
+    
+    // Update history
+    if (viewHistory[viewHistory.length - 1] !== viewId) {
+      viewHistory.push(viewId);
+    }
+  }
+}
+
+// Setup event listeners
+window.addEventListener('popstate', handleBackButton);
+document.addEventListener('backbutton', handleBackButton, false); // For Cordova
+/****** END OF BACK BUTTON HANDLING SYSTEM ******/
+
       document.addEventListener('DOMContentLoaded', function() {
 
         const navItems = document.querySelectorAll('.nav-item');
@@ -2776,44 +2796,13 @@
           'Josei', 'Seinen', 'Mecha', 'School Life'
         ];
 
-        navItems.forEach(item => {
-          item.addEventListener('click', async function(e) {
-            e.preventDefault();
-
-            if (this.classList.contains('active')) return;
-
-            const viewId = this.getAttribute('data-view');
-            const currentActiveView = document.querySelector('.content-view.active');
-            const newView = document.getElementById(viewId);
-
-            const header = document.querySelector('header');
-            const body = document.body;
-
-            if (viewId === 'settings-view') {
-              header.classList.add('hidden');
-              body.classList.add('header-hidden');
-            } else {
-              header.classList.remove('hidden');
-              body.classList.remove('header-hidden');
-            }
-
-            if (currentActiveView) {
-              currentActiveView.classList.remove('active');
-              await new Promise(resolve => setTimeout(resolve, 50));
-            }
-
-            navItems.forEach(nav => nav.classList.remove('active'));
-            this.classList.add('active');
-
-            newView.classList.add('active');
-
-            if (viewId === 'home-view') {
-              newView.style.opacity = '0';
-              await new Promise(resolve => setTimeout(resolve, 100));
-              newView.style.opacity = '1';
-            }
-          });
-        });
+        // Ganti kode navItems yang lama dengan ini:
+navItems.forEach(item => {
+  item.addEventListener('click', function(e) {
+    e.preventDefault();
+    showView(this.getAttribute('data-view'));
+  });
+});
 
         function initGenrePopup() {
           genrePopupGrid.innerHTML = '';
@@ -3168,30 +3157,43 @@ function generateQRCode() {
 
 // Event saat tombol Donasi ditekan
 if (donationBtn) {
-  donationBtn.addEventListener('click', function () {
+  donationBtn.addEventListener('click', function() {
     donationModal.style.display = 'flex';
-    document.body.style.overflow = 'hidden';
     
-    // Tunggu sedikit agar container muncul dan ukurannya valid
+    // Trigger reflow untuk memastikan animasi berjalan
+    void donationModal.offsetWidth;
+    
+    // Aktifkan modal dan trigger animasi
+    donationModal.classList.add('active');
+    
     setTimeout(generateQRCode, 50);
   });
 }
 
 // Event untuk menutup modal dengan tombol X
 if (closeDonation) {
-  closeDonation.addEventListener('click', function () {
-    donationModal.style.display = 'none';
-    document.body.style.overflow = 'auto';
+  closeDonation.addEventListener('click', function() {
+    closeDonationModal();
   });
 }
 
 // Event untuk menutup modal jika klik di luar konten modal
-donationModal.addEventListener('click', function (e) {
+donationModal.addEventListener('click', function(e) {
   if (e.target === donationModal) {
-    donationModal.style.display = 'none';
-    document.body.style.overflow = 'auto';
+    closeDonationModal();
   }
 });
+
+// Fungsi untuk menutup modal dengan animasi
+function closeDonationModal() {
+  donationModal.classList.remove('active');
+  
+  // Tunggu animasi selesai sebelum menyembunyikan modal
+  setTimeout(() => {
+    donationModal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+  }, 300); // Sesuaikan dengan durasi animasi
+}
 
         function showComicReader(comicData, chapter) {
 

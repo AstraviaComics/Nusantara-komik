@@ -8,6 +8,52 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.3.2/css/flag-icons.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <link rel="stylesheet" href="style.css">
+    <script>
+  const viewStack = [];
+
+  function navigateTo(viewId) {
+    const current = document.querySelector('.content-view.active, .sub-view.active');
+    if (current) {
+      current.classList.remove('active');
+      viewStack.push(current.id);
+    }
+
+    const target = document.getElementById(viewId);
+    if (target) {
+      target.classList.add('active');
+      // Tambah ke browser history agar tombol back Android bisa terpicu
+      history.pushState({ viewId }, '', '');
+    }
+  }
+
+  function goBack() {
+    const current = document.querySelector('.content-view.active, .sub-view.active');
+    if (current) current.classList.remove('active');
+
+    const prevId = viewStack.pop();
+    if (prevId) {
+      const previous = document.getElementById(prevId);
+      if (previous) previous.classList.add('active');
+    } else {
+      // Jika tidak ada history, kembalikan ke home
+      document.getElementById('home-view').classList.add('active');
+    }
+  }
+
+  // Tangkap tombol kembali dari Android (via history back)
+  window.addEventListener('popstate', (event) => {
+    // Gunakan stack internal kita
+    goBack();
+  });
+
+  // Untuk tombol panah back di UI
+  document.querySelectorAll('.sub-view-back').forEach(button => {
+    button.addEventListener('click', () => {
+      // Simulasikan tombol Android back juga
+      history.back();
+    });
+  });
+    </script>
     <link rel="manifest" href="manifest.json" />
     <title>Nusantara-Komik</title>
     <style>
